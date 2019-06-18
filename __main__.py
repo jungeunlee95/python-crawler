@@ -93,19 +93,12 @@ def crawling_nene():
 
         divs = bs.select('.shopWrap > .shop')
         for info in divs:
-            # --- 1
-            # strings = list(info.strings)
-            # name = strings[10]
-            # addr = strings[12]
-            # sidogu = addr.split()[:2]
-            # call = strings[20]
-
-            # --- 2
             info_list = info.select('td')
             name = info_list[0].select('.shopName')[0].text
             addr = info_list[0].select('.shopAdd')[0].text
             sidogu = addr.split()[:2]
             call = info_list[1].a['href'].split(':')[1]
+
             results.append((name, addr, call) + tuple(sidogu))
 
         if page == 1:
@@ -118,7 +111,7 @@ def crawling_nene():
 
 if __name__ == '__main__':
     # pelicana
-    # crawling_pelicana()
+    crawling_pelicana()
 
     # nene 과제
     crawling_nene()
