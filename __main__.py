@@ -3,38 +3,39 @@ import sys
 from datetime import datetime
 from itertools import count
 from urllib.request import Request, urlopen
-
 import pandas as pd
 from bs4 import BeautifulSoup
+
+
+def get_html(url):
+    try:
+        request = Request(url)
+
+        # CERTIFICATE_VERIFY_FAILED 에러 해결
+        # context = ssl._create_unverified_context()
+        # response = urlopen(request, context=context)
+
+        # 위 아래 둘 중 하나로 해결 가능!
+
+        ssl._create_default_https_context = ssl._create_unverified_context
+        response = urlopen(request)
+
+        receive = response.read()
+        html = receive.decode('utf-8', errors='replace')
+        print(f'{datetime.now()} : success for request [{url}')
+    except Exception as e:
+        print('%s : %s' % (e, datetime.now()), file=sys.stderr)
+
+    return html
+
 
 def crawling_pelicana():
     results = []
     for page in count(start=113):
         url = 'https://pelicana.co.kr/store/stroe_search.html?branch_name=&gu=&si=&page=%d' % page
-
-        try:
-            request = Request(url)
-
-            # CERTIFICATE_VERIFY_FAILED 에러 해결
-            # context = ssl._create_unverified_context()
-            # response = urlopen(request, context=context)
-
-            # 위 아래 둘 중 하나로 해결 가능!
-
-            ssl._create_default_https_context = ssl._create_unverified_context
-            response = urlopen(request)
-
-            receive = response.read()
-            html = receive.decode('utf-8', errors='replace')
-            # print(html)
-            print(f'{datetime.now()} : success for request [{url}')
-        except Exception as e:
-            print('%s : %s' % (e, datetime.now()), file=sys.stderr)
-            continue
-
+        html = get_html(url)
 
         bs = BeautifulSoup(html, 'html.parser')
-
 
         # # ---- 1
         # trs = bs.table.findAll("tr")
@@ -44,8 +45,6 @@ def crawling_pelicana():
         #     addr = td[1].text
         #     call = td[2].text.strip()
         #     sidogu = addr.split()[:2]
-        #     print(f'가게 이름: {title}, 주소: {addr}, 전화번호: {call}, 시도구 : {sidogu[0], sidogu[1]}')
-        #     print("--------------------------------")
 
         # ---- 2
         tag_table = bs.find('table', attrs={'class': 'table mt20'})
@@ -75,19 +74,8 @@ def crawling_nene():
     results = []
     cnt = 0
     for page in count(start=1):
-        try:
-            url = 'https://nenechicken.com/17_new/sub_shop01.asp?ex_select=1&ex_select2=&IndexSword=&GUBUN=A&page=%d' % page
-            request = Request(url)
-            response = urlopen(request)
-
-            receive = response.read()
-            html = receive.decode('utf-8')
-
-            print(f'{datetime.now()} : success for request [{url}')
-
-        except Exception as e:
-            print('%s : %s' % (e, datetime.now()), file=sys.stderr)
-            continue
+        url = 'https://nenechicken.com/17_new/sub_shop01.asp?ex_select=1&ex_select2=&IndexSword=&GUBUN=A&page=%d' % page
+        html = get_html(url)
 
         bs = BeautifulSoup(html, 'html.parser')
 
@@ -111,7 +99,7 @@ def crawling_nene():
 
 if __name__ == '__main__':
     # pelicana
-    crawling_pelicana()
+    # crawling_pelicana()
 
     # nene 과제
     crawling_nene()
