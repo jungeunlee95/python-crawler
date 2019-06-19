@@ -6,6 +6,8 @@ from urllib.request import Request, urlopen
 import pandas as pd
 from bs4 import BeautifulSoup
 
+from collection import crawler
+
 
 def get_html(url):
     try:
@@ -33,7 +35,8 @@ def crawling_pelicana():
     results = []
     for page in count(start=113):
         url = 'https://pelicana.co.kr/store/stroe_search.html?branch_name=&gu=&si=&page=%d' % page
-        html = get_html(url)
+        html = crawler.crawling(url)
+        # html = get_html(url)
 
         bs = BeautifulSoup(html, 'html.parser')
 
@@ -97,9 +100,38 @@ def crawling_nene():
     table = pd.DataFrame(results, columns=['name', 'address','tel', 'sido', 'gu'])
     table.to_csv('__results__/nene.csv', encoding='utf-8', mode='w', index=0)
 
+def crawling_kyochon():
+    results = []
+    for sido1 in range(1, 18):
+        for sido2 in count(start=1):
+            url = 'http://www.kyochon.com/shop/domestic.asp?sido1=%d&sido2=%d' % (sido1, sido2)
+            html = crawler.crawling(url)
+
+            # 끝 검출
+            if html is None:
+                break
+
+            bs = BeautifulSoup(html, 'html.parser')
+            tag_ul = bs.find('ul', attrs={'class':'list'})
+            tags_span = tag_ul.findAll('span', attrs={'class':'store_item'})
+
+            for tag_span in tags_span:
+                strings = list(tag_span.strings)
+                name = strings[1]
+                addrs = strings[3].strip()
+                sidogu = addrs.split()[:2]
+                results.append((name, addrs) + tuple(sidogu))
+
+    # store
+    table = pd.DataFrame(results, columns=['name', 'address', 'sido', 'gu'])
+    table.to_csv('__results__/kyochon.csv', encoding='utf-8', mode='w', index=0)
+
 if __name__ == '__main__':
     # pelicana
     # crawling_pelicana()
 
     # nene 과제
-    crawling_nene()
+    # crawling_nene()
+
+    # kyochon
+    crawling_kyochon()
