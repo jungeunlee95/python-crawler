@@ -1,3 +1,4 @@
+import os
 import ssl
 import sys
 import time
@@ -103,7 +104,17 @@ def crawling_nene():
             break
     # store
     table = pd.DataFrame(results, columns=['name', 'address','tel', 'sido', 'gu'])
-    table.to_csv('__results__/nene.csv', encoding='utf-8', mode='w', index=0)
+
+    # 모듈의 절대위치 구하기(다른 환경에서 실행할 때)
+    # print(os.path.abspath(__file__)) # 모듈의 절대경로 -> D:\dowork\PycharmProjects\python_crawler\__main__.py
+    
+    # 로컬 용 경로
+    # BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    # RESULT_DIR = f'{BASE_DIR}/__results__'
+    # table.to_csv(f'{RESULT_DIR}/nene.csv', encoding='utf-8', mode='w', index=0)
+    
+    # 리눅스 용 경로
+    table.to_csv('/root/crawling-results/nene.csv', encoding='utf-8', mode='w', index=0)
 
 def crawling_kyochon():
     results = []
